@@ -1,15 +1,14 @@
 import { Any, EventChannel, FlutterPlugin, FlutterPluginBinding, StandardMessageCodec } from '@ohos/flutter_ohos';
 
-import { EventSink, StreamHandler, } from '@ohos/flutter_ohos/src/main/ets/plugin/common/EventChannel';
 import FlutterunionadViewConfig from './FlutterunionadViewConfig';
 
 import SplashAdViewFactory from './splash/SplashAdViewFactory';
-import { window } from '@kit.ArkUI';
+import BannerAdViewFactory from './banner/BannerAdViewFactory';
+import { UIAbility } from '@kit.AbilityKit';
 
 export default class FlutterUnionadViewPlugin {
-  static register(binding: FlutterPluginBinding, window: window.WindowStage) {
-    //spalsh广告
-    let splashAdViewFactory = new SplashAdViewFactory(binding, window);
-    binding.getPlatformViewRegistry().registerViewFactory(FlutterunionadViewConfig.view.splashAdView, splashAdViewFactory)
+  static register(binding: FlutterPluginBinding, uIAbility: UIAbility) {
+    binding.getPlatformViewRegistry().registerViewFactory(FlutterunionadViewConfig.view.splashAdView, new SplashAdViewFactory(binding, uIAbility))
+    binding.getPlatformViewRegistry().registerViewFactory(FlutterunionadViewConfig.view.bannerAdView, new BannerAdViewFactory(binding, uIAbility))
   }
 }

@@ -2,20 +2,25 @@ import { Params } from '@ohos/flutter_ohos/src/main/ets/plugin/platform/Platform
 import { AdSlotBuilder, CSJAdSdk, CSJSplashAd, CSJSplashAdCloseType, CSJSplashAdInteractionListener, CSJSplashAdLoadListener, CSJSplashAdLoadParam, ExpressAdInteractionListener, NativeExpressAdListener } from '@csj/openadsdk';
 import { MethodChannel } from '@ohos/flutter_ohos';
 import { window } from '@kit.ArkUI';
+import SplashConstants from './SplashConstants';
 
 @Component
 export struct SplashNativeView {
-  @Prop timeout: number;
   @Prop params: Params;
-  @Prop mCodeId: string;
-  @Prop viewWidth: number;
-  @Prop viewHeight: number;
+
   @State splashAd?: CSJSplashAd = undefined
-  mAdCreator = CSJAdSdk.getAdCreator()
-  @Prop channel?: MethodChannel
+
+  timeout: number = 0;
+  mCodeId: string = '';
+  viewWidth: number = 0;
+  viewHeight: number = 0;
+  channel?: MethodChannel
+  windowStage?: window.WindowStage
+
   @State isClose: boolean = false
-  @Prop windowStage: window.WindowStage
   @State mWindow?: window.Window = undefined
+
+  mAdCreator = CSJAdSdk.getAdCreator()
 
   build() {
     if (!this.isClose) {
@@ -28,6 +33,13 @@ export struct SplashNativeView {
   }
 
   aboutToAppear(): void {
+    this.mCodeId = SplashConstants.mCodeId;
+    this.viewWidth = SplashConstants.viewWidth;
+    this.viewHeight = SplashConstants.viewHeight;
+    this.timeout = SplashConstants.timeout;
+    this.channel = SplashConstants.channel;
+    this.windowStage = SplashConstants.windowStage;
+
     let adSlot = new AdSlotBuilder()
       .setCodeId(this.mCodeId)
       .setAcceptSize(this.viewWidth, this.viewHeight)
@@ -82,7 +94,7 @@ export struct SplashNativeView {
           return;
         }
 
-        this.windowStage.createSubWindow("splashAdWindow", (err, window) => {
+        this.windowStage?.createSubWindow("splashAdWindow", (err, window) => {
           if (!window) {
             return;
           }
@@ -109,14 +121,8 @@ export struct SplashNativeView {
 }
 
 @Builder
-export function SplashBuilder(params: Params, mCodeId: string, viewWidth: number, viewHeight: number, timeout: number, channel: MethodChannel, windowStage: window.WindowStage) {
+export function SplashBuilder(params: Params) {
   SplashNativeView({
     params: params,
-    mCodeId,
-    viewWidth,
-    viewHeight,
-    timeout,
-    channel,
-    windowStage
   })
 }
