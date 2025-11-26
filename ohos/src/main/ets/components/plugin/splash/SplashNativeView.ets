@@ -5,6 +5,7 @@ import { window } from '@kit.ArkUI';
 
 @Component
 export struct SplashNativeView {
+  @Prop timeout: number;
   @Prop params: Params;
   @Prop mCodeId: string;
   @Prop viewWidth: number;
@@ -102,18 +103,19 @@ export struct SplashNativeView {
       }
     }
 
-    let loadParam = new CSJSplashAdLoadParam(adSlot, expressLoadAdListener, this.getUIContext())
+    let loadParam = new CSJSplashAdLoadParam(adSlot, expressLoadAdListener, this.getUIContext(), this.timeout)
     this.mAdCreator.loadSplashAd(loadParam)
   }
 }
 
 @Builder
-export function SplashBuilder(params: Params, mCodeId: string, viewWidth: number, viewHeight: number, channel: MethodChannel, windowStage: window.WindowStage) {
+export function SplashBuilder(params: Params, mCodeId: string, viewWidth: number, viewHeight: number, timeout: number, channel: MethodChannel, windowStage: window.WindowStage) {
   SplashNativeView({
     params: params,
     mCodeId,
     viewWidth,
     viewHeight,
+    timeout,
     channel,
     windowStage
   })

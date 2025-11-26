@@ -10,6 +10,7 @@ export default class SplashView extends PlatformView {
   mCodeId = "";
   viewWidth = 0.0
   viewHeight = 0.0
+  timeout = 3000
   channel: MethodChannel
   window: window.WindowStage
 
@@ -19,13 +20,14 @@ export default class SplashView extends PlatformView {
     this.mCodeId = params["ohosId"] as string
     this.viewWidth = params["width"] as number
     this.viewHeight = params["height"] as number
+    this.timeout = params["timeout"] as number
     this.window = window
     this.channel = new MethodChannel(messenger, FlutterunionadViewConfig.view.splashAdView + "_" + viewId)
   }
 
   getView(): WrappedBuilder<[Params]> {
     return new WrappedBuilder<[Params]>((params) => {
-      return SplashBuilder(params, this.mCodeId, this.viewWidth, this.viewHeight, this.channel, this.window)
+      return SplashBuilder(params, this.mCodeId, this.viewWidth, this.viewHeight, this.timeout, this.channel, this.window)
     })
   }
 
