@@ -22,6 +22,7 @@ import {
 import { UIAbility } from '@kit.AbilityKit';
 import FlutterUnionadEventPlugin from './FlutterUnionadEventPlugin';
 import FullScreenVideoAdInteraction from './FullScreenVideoAdInteraction';
+import FlutterUnionadViewPlugin from './FlutterUnionadViewPlugin';
 
 /** FlutterUnionadPlugin **/
 export default class FlutterUnionadPlugin implements FlutterPlugin, MethodCallHandler, AbilityAware {
@@ -42,6 +43,7 @@ export default class FlutterUnionadPlugin implements FlutterPlugin, MethodCallHa
     this.channel = new MethodChannel(binding.getBinaryMessenger(), "flutter_unionad");
     this.channel.setMethodCallHandler(this)
     this.applicationContext = binding.getApplicationContext();
+    FlutterUnionadViewPlugin.register(binding, this.uiAbility!.context.windowStage)
     new FlutterUnionadEventPlugin().onAttachedToEngine(binding);
   }
 
