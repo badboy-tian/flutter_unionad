@@ -14,7 +14,7 @@ export default class SplashAdViewFactory extends PlatformViewFactory {
   }
 
   public create(context: common.Context, viewId: number, args: Any): PlatformView {
-    console.log(`SplashAdViewFactory created viewId: ${viewId}, args type: ${typeof args}, args: ${JSON.stringify(args)}`);
+    //console.log(`SplashAdViewFactory created viewId: ${viewId}, args type: ${typeof args}, args: ${JSON.stringify(args)}`);
     return new SplashView(context, viewId, args, this.binding?.getBinaryMessenger()!, this.uIAbility!);
   }
 }

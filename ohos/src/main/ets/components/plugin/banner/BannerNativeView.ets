@@ -1,97 +1,130 @@
 import { Params } from '@ohos/flutter_ohos/src/main/ets/plugin/platform/PlatformView';
-import { AdSlotBuilder, CSJAdSdk, CSJNativeExpressAd, ExpressAdInteractionListener, NativeExpressAdListener } from '@csj/openadsdk';
-import { MethodChannel } from '@ohos/flutter_ohos';
-import BannerConstants from './BannerConstants';
+import { AdSlotBuilder, CSJAdSdk, CSJNativeExpressAd, ExpressAdInteractionListener, NativeExpressAdListener, AdSlot } from '@csj/openadsdk';
+import { MethodChannel, Any } from '@ohos/flutter_ohos';
+import BannerView from './BannerView';
 import { ArrayList } from '@kit.ArkTS';
 
 @Component
 export struct BannerNativeView {
   @Prop params: Params;
-
   @State bannerAd?: CSJNativeExpressAd = undefined
-
-  mCodeId: string = '';
-  viewWidth: number = 0;
-  viewHeight: number = 0;
+  bannerView: BannerView = this.params.platformView as BannerView
+  mCodeId: string = ''
   acceptWidth: number = 0;
   acceptHeight: number = 0;
-  channel?: MethodChannel
-
-  mAdCreator = CSJAdSdk.getAdCreator()
+  mAdSlot?: AdSlot
 
   build() {
     Row() {
-      if (this.bannerAd) {
+      if (this.bannerAd && this.mAdSlot) {
         NodeContainer(this.bannerAd.getAdComponent())
-          .width(this.acceptWidth)
-          .height(this.acceptHeight)
+          .width(this.mAdSlot.getAcceptWidth())
+          .height(this.mAdSlot.getAcceptHeight())
           .alignSelf(ItemAlign.Center)
-          .align(Alignment.Center)
+          .align(Alignment.Center);
       }
-    }.width(this.viewWidth).height(this.viewHeight)
+    }
   }
 
   aboutToAppear(): void {
-    this.mCodeId = BannerConstants.mCodeId;
-    this.viewWidth = BannerConstants.viewWidth;
-    this.viewHeight = BannerConstants.viewHeight;
-    this.acceptWidth = BannerConstants.acceptWidth;
-    this.acceptHeight = BannerConstants.acceptHeight;
-    this.channel = BannerConstants.channel;
+    this.mCodeId = this.bannerView.getMCodeId();
+    this.acceptWidth = this.bannerView.getAcceptWidth();
+    this.acceptHeight = this.bannerView.getAcceptHeight();
 
     this.loadAd()
   }
 
   private loadAd() {
-    const adSlot = new AdSlotBuilder()
+    this.mAdSlot = new AdSlotBuilder()
       .setCodeId(this.mCodeId)
+      .setAdCount(1)
       .setAcceptSize(this.acceptWidth, this.acceptHeight)
       .build()
 
-    this.mAdCreator.loadBannerAd(adSlot, this.mLoadListener)
+    let mLoadListener: NativeExpressAdListener = {
+      onError: (code: number, message: string) => {
+        //console.error("BannerView->加载广告失败，code=" + code + "，message=" + message);
+        this.bannerView.sendMsg("onFail", `${code}, ${message}`)
+      },
+
+      onNativeExpressAdLoad: (ads: ArrayList<CSJNativeExpressAd>) => {
+        //console.log("BannerView==onNativeExpressAdLoad......success");
+        if (ads && ads.length > 0) {
+          // 获取第一个广告
+          this.showAd(ads[0])
+        }
+      }
+    }
+
+    let mAdCreator = CSJAdSdk.getAdCreator()
+    mAdCreator.loadBannerAd(this.mAdSlot, mLoadListener)
   }
 
   private showAd(bannerAd: CSJNativeExpressAd) {
     bannerAd.setExpressInteractionListener({
       onAdClicked: (type: number) => {
-        console.log("BannerNativeView==onAdClicked......");
-        this.channel?.invokeMethod("onClick", "Banner广告点击")
+        console.log("BannerView==onAdClicked......");
+        //this.channel?.invokeMethod("onClick", "Banner广告点击")
+        this.bannerView.sendMsg("onClick", "Banner广告点击")
       },
 
       onAdShow: (type: number) => {
-        console.log("BannerNativeView==onAdShow......");
-        this.channel?.invokeMethod("onShow", "Banner广告展示")
+
       },
 
       onRenderFail: (code: number, msg: string) => {
-        console.log("BannerNativeView==onRenderFail...code=" + code + ",msg=" + msg);
-        this.channel?.invokeMethod("onFail", `${code}, ${msg}`)
+        console.log("BannerView==onRenderFail...code=" + code + ",msg=" + msg);
+        //this.channel?.invokeMethod("onFail", `${code}, ${msg}`)
+        this.bannerView.sendMsg("onFail", `${code}, ${msg}`)
+        this.bannerAd = undefined;
       },
 
       onRenderSuccess: (width: number, height: number) => {
-        console.log("BannerNativeView==onRenderSuccess......width=" + width + ",height=" + height);
-        this.channel?.invokeMethod("onSuccess", `渲染成功: width=${width}, height=${height}`)
+        //console.log("BannerView==onRenderSuccess......width=" + width + ",height=" + height);
+        this.bannerAd = bannerAd;
+        //console.log("BannerView==onAdShow......");
+        let map: Record<string, Any> = {
+          "width": width, "height": height
+        };
+        //this.channel?.invokeMethod("onShow", map)
+        this.bannerView.sendMsg("onShow", map)
       }
     })
 
+    this.setDislikeCallback(bannerAd);
+    bannerAd.setSlideIntervalTime(30 * 1000)
     // 渲染广告
     bannerAd.render(this.getUIContext())
   }
 
-  private mLoadListener: NativeExpressAdListener = {
-    onError: (code: number, message: string) => {
-      console.error("加载广告失败，code=" + code + "，message=" + message);
-      this.channel?.invokeMethod("onFail", `${code}, ${message}`);
-    },
+  private setDislikeCallback(ad: CSJNativeExpressAd) {
+    ad.setDislikeCallback({
+      /**
+       * dislike show
+       */
+      onShow: () => {
+        //console.log("BannerExpressAdPage==dislike......show");
+      },
 
-    onNativeExpressAdLoad: (ads: ArrayList<CSJNativeExpressAd>) => {
-      console.log("BannerNativeView==onNativeExpressAdLoad......success");
-      if (ads && ads.length > 0) {
-        // 获取第一个广告
-        this.bannerAd = ads[0]
-        this.showAd(this.bannerAd)
+      /**
+       * @param position 选择的位置
+       * @param value 选择的内容
+       * @param enforceRemove 是否强制关闭广告
+       */
+      onSelected: (position: number, value: string, enforceRemove: boolean) => {
+        //console.log("BannerView==dislike......onSelected:position=" + position + ",value:" + value + ",enforce=" + enforceRemove);
+        //this.channel?.invokeMethod("onDislike", value);
+        this.bannerView.sendMsg("onDislike", value);
+        this.bannerAd = undefined;
+      },
+
+      /**
+       * 点击取消
+       */
+      onCancel: () => {
+        //console.log("BannerView==dislike......onCancel");
       }
-    }
+    })
   }
 }
 

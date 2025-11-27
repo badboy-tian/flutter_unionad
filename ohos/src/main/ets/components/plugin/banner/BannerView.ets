@@ -4,33 +4,20 @@ import { ArrayList, HashMap } from "@kit.ArkTS";
 import FlutterunionadViewConfig from "../FlutterunionadViewConfig";
 import { BannerBuilder } from "./BannerNativeView";
 import { Params } from '@ohos/flutter_ohos/src/main/ets/plugin/platform/PlatformView';
-import BannerConstants from "./BannerConstants";
 
 export default class BannerView extends PlatformView {
-  mCodeId = "";
-  viewWidth = 0.0
-  viewHeight = 0.0
-  acceptWidth = 0.0
-  acceptHeight = 0.0
-  channel: MethodChannel
+  private mCodeId = "";
+  private acceptWidth = 0.0
+  private acceptHeight = 0.0
+  private channel: MethodChannel
 
   constructor(context: common.Context, viewId: number, params: HashMap<string, Any>, messenger: BinaryMessenger, uIAbility: UIAbility) {
     super();
 
-    console.log("BannerView ohosId: " + JSON.stringify(params))
-    this.mCodeId = params["ohosId"] as string
-    this.viewWidth = params["width"] as number
-    this.viewHeight = params["height"] as number
-    this.acceptWidth = params["acceptWidth"] as number
-    this.acceptHeight = params["acceptHeight"] as number
+    this.mCodeId = params.get("ohosId") as string
+    this.acceptWidth = params.get("width") as number
+    this.acceptHeight = params.get("height") as number
     this.channel = new MethodChannel(messenger, FlutterunionadViewConfig.view.bannerAdView + "_" + viewId)
-
-    BannerConstants.mCodeId = this.mCodeId
-    BannerConstants.viewWidth = this.viewWidth
-    BannerConstants.viewHeight = this.viewHeight
-    BannerConstants.acceptWidth = this.acceptWidth
-    BannerConstants.acceptHeight = this.acceptHeight
-    BannerConstants.channel = this.channel
   }
 
   getView(): WrappedBuilder<[Params]> {
@@ -38,5 +25,21 @@ export default class BannerView extends PlatformView {
   }
 
   dispose(): void {
+  }
+
+  sendMsg(key: string, msg: Any) {
+    this.channel.invokeMethod(key, msg)
+  }
+
+  getMCodeId() : string{
+    return this.mCodeId
+  }
+
+  getAcceptWidth() : number{
+    return this.acceptWidth
+  }
+
+  getAcceptHeight() : number{
+    return this.acceptHeight
   }
 }

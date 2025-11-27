@@ -14,7 +14,7 @@ export default class BannerAdViewFactory extends PlatformViewFactory {
   }
 
   public create(context: common.Context, viewId: number, args: Any): PlatformView {
-    console.log(`BannerAdViewFactory created viewId: ${viewId}, args type: ${typeof args}, args: ${JSON.stringify(args)}`);
+    //console.log(`BannerView created viewId: ${viewId}, args type: ${typeof args}, args: ${JSON.stringify(args)}`);
     return new BannerView(context, viewId, args, this.binding?.getBinaryMessenger()!, this.uIAbility!);
   }
 }

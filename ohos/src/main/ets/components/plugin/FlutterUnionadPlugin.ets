@@ -8,7 +8,6 @@ import { UIAbility } from '@kit.AbilityKit';
 import FlutterUnionadEventPlugin from './FlutterUnionadEventPlugin';
 import FullScreenVideoAdInteraction from './FullScreenVideoAdInteraction';
 import FlutterUnionadViewPlugin from './FlutterUnionadViewPlugin';
-import SplashConstants from './splash/SplashConstants';
 
 /** FlutterUnionadPlugin **/
 export default class FlutterUnionadPlugin implements FlutterPlugin, MethodCallHandler, AbilityAware {

@@ -5,35 +5,57 @@ import FlutterunionadViewConfig from "../FlutterunionadViewConfig";
 import { SplashBuilder } from "./SplashNativeView";
 import { Params } from '@ohos/flutter_ohos/src/main/ets/plugin/platform/PlatformView';
 import { window } from "@kit.ArkUI";
-import SplashConstants from "./SplashConstants";
 
 export default class SplashView extends PlatformView {
-  mCodeId = "";
-  viewWidth = 0.0
-  viewHeight = 0.0
-  timeout = 3000
-  channel: MethodChannel
+  private mCodeId = "";
+  private viewWidth = 0.0
+  private viewHeight = 0.0
+  private timeout = 3000
+  private channel: MethodChannel
+  private windowStage?: window.WindowStage
 
   constructor(context: common.Context, viewId: number, params: HashMap<string, Any>, messenger: BinaryMessenger, uIAbility: UIAbility) {
     super();
 
-    console.log("SplashView ohosId: " + JSON.stringify(params))
-    this.mCodeId = params["ohosId"] as string
-    this.viewWidth = params["width"] as number
-    this.viewHeight = params["height"] as number
-    this.timeout = params["timeout"] as number
+    this.mCodeId = params.get("ohosId") as string
+    this.viewWidth = params.get("width") as number
+    this.viewHeight = params.get("height") as number
+    this.timeout = params.get("timeout") as number
     this.channel = new MethodChannel(messenger, FlutterunionadViewConfig.view.splashAdView + "_" + viewId)
-
-    SplashConstants.mCodeId = this.mCodeId
-    SplashConstants.viewWidth = this.viewWidth
-    SplashConstants.viewHeight = this.viewHeight
-    SplashConstants.timeout = this.timeout
-    SplashConstants.channel = this.channel
-    SplashConstants.windowStage = uIAbility.context.windowStage
+    this.windowStage = uIAbility.context.windowStage
   }
 
   getView(): WrappedBuilder<[Params]> {
     return new WrappedBuilder(SplashBuilder)
+  }
+
+  getMCodeId() : string {
+    return this.mCodeId
+  }
+
+  getViewWidth() : number {
+    return this.viewWidth
+  }
+
+  getViewHeight() : number {
+    return this.viewHeight
+  }
+
+  getTimeout() : number {
+    return this.timeout
+  }
+
+  getChannel() : MethodChannel {
+    return this.channel
+  }
+
+  getWindowStage() : window.WindowStage {
+    return this.windowStage!
+  }
+
+  sendMsg(key: string, msg: Any) {
+    //console.log("SplashNativeView=>sendMsg: " + key + ", msg: " +  JSON.stringify(msg))
+    this.channel.invokeMethod(key, msg)
   }
 
   dispose(): void {
