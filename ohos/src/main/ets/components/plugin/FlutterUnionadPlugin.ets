@@ -1,27 +1,13 @@
 import {
-  AbilityAware,
-  AbilityPluginBinding,
-  Any,
-  FlutterPlugin,
-  FlutterPluginBinding,
-  MethodCall,
-  MethodCallHandler,
-  MethodChannel,
-  MethodResult,
+  AbilityAware, AbilityPluginBinding, Any, FlutterPlugin, FlutterPluginBinding, MethodCall, MethodCallHandler, MethodChannel, MethodResult,
 } from '@ohos/flutter_ohos';
 import {
-  AdLoadType,
-  AdSlotBuilder,
-  CSJAdSdk,
-  CSJRewardAd,
-  RewardAdInteractionListener,
-  RewardAdLoadListener,
-  SDKConfig,
-  SDKConfigBuilder
+  AdLoadType, AdSlotBuilder, CSJAdSdk, CSJRewardAd, RewardAdInteractionListener, RewardAdLoadListener, SDKConfig, SDKConfigBuilder
 } from '@csj/openadsdk';
 import { UIAbility } from '@kit.AbilityKit';
 import FlutterUnionadEventPlugin from './FlutterUnionadEventPlugin';
 import FullScreenVideoAdInteraction from './FullScreenVideoAdInteraction';
+import FlutterUnionadViewPlugin from './FlutterUnionadViewPlugin';
 
 /** FlutterUnionadPlugin **/
 export default class FlutterUnionadPlugin implements FlutterPlugin, MethodCallHandler, AbilityAware {
@@ -30,6 +16,7 @@ export default class FlutterUnionadPlugin implements FlutterPlugin, MethodCallHa
   private uiAbility: UIAbility | null = null;
   private adCreator = CSJAdSdk.getAdCreator();
   private rewardAd: CSJRewardAd | null = null;
+  private flutterPluginBinding: FlutterPluginBinding | null = null;
 
   constructor() {
   }
@@ -39,6 +26,8 @@ export default class FlutterUnionadPlugin implements FlutterPlugin, MethodCallHa
   }
 
   onAttachedToEngine(binding: FlutterPluginBinding): void {
+    console.log("FlutterUnionadPlugin onAttachedToEngine")
+    this.flutterPluginBinding = binding;
     this.channel = new MethodChannel(binding.getBinaryMessenger(), "flutter_unionad");
     this.channel.setMethodCallHandler(this)
     this.applicationContext = binding.getApplicationContext();
@@ -49,10 +38,16 @@ export default class FlutterUnionadPlugin implements FlutterPlugin, MethodCallHa
     if (this.channel != null) {
       this.channel.setMethodCallHandler(null)
     }
+
+    this.flutterPluginBinding = null
   }
 
   onAttachedToAbility(binding: AbilityPluginBinding): void {
+    console.log("FlutterUnionadPlugin onAttachedToAbility")
     this.uiAbility = binding.getAbility()
+    if(this.flutterPluginBinding){
+      FlutterUnionadViewPlugin.register(this.flutterPluginBinding, this.uiAbility)
+    }
   }
 
   onDetachedFromAbility(): void {

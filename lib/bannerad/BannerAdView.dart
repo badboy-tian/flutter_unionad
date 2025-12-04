@@ -6,6 +6,7 @@ import 'package:flutter_unionad/flutter_unionad.dart';
 class FlutterUnionadBannerView extends StatefulWidget {
   final String androidCodeId;
   final String iosCodeId;
+  final String? ohosId;
   final double width;
   final double height;
   final FlutterUnionadBannerCallBack? callBack;
@@ -26,6 +27,7 @@ class FlutterUnionadBannerView extends StatefulWidget {
       {Key? key,
       required this.androidCodeId,
       required this.iosCodeId,
+      this.ohosId,
       required this.width,
       required this.height,
       this.callBack})
@@ -90,6 +92,21 @@ class _BannerAdViewState extends State<FlutterUnionadBannerView> {
           creationParamsCodec: const StandardMessageCodec(),
         ),
       );
+    } else if (defaultTargetPlatform == TargetPlatform.ohos) {
+      return Container(
+        width: _width,
+        height: _height,
+        child: OhosView(
+          viewType: _viewType,
+          creationParams: {
+            "ohosId": widget.ohosId,
+            "width": widget.width,
+            "height": widget.height,
+          },
+          onPlatformViewCreated: _registerChannel,
+          creationParamsCodec: const StandardMessageCodec(),
+        ),
+      );
     } else {
       return Container();
     }
@@ -103,6 +120,7 @@ class _BannerAdViewState extends State<FlutterUnionadBannerView> {
 
   //监听原生view传值
   Future<dynamic> _platformCallHandler(MethodCall call) async {
+    //debugPrint("监听原生view传值=>${call.method}  ${call.arguments} ${_channel?.name}");
     switch (call.method) {
       //显示广告
       case FlutterUnionadMethod.onShow:
