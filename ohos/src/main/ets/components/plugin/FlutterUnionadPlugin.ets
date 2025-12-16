@@ -2,7 +2,7 @@ import {
   AbilityAware, AbilityPluginBinding, Any, FlutterPlugin, FlutterPluginBinding, MethodCall, MethodCallHandler, MethodChannel, MethodResult,
 } from '@ohos/flutter_ohos';
 import {
-  AdLoadType, AdSlotBuilder, CSJAdSdk, CSJRewardAd, RewardAdInteractionListener, RewardAdLoadListener, SDKConfig, SDKConfigBuilder
+  AdLoadType, AdSlotBuilder, CSJAdSdk, CSJRewardAd, RewardAdInteractionListener, RewardAdLoadListener, SDKConfig, SDKConfigBuilder, MediationConfigBuilder
 } from '@csj/openadsdk';
 import { UIAbility } from '@kit.AbilityKit';
 import FlutterUnionadEventPlugin from './FlutterUnionadEventPlugin';
@@ -59,6 +59,7 @@ export default class FlutterUnionadPlugin implements FlutterPlugin, MethodCallHa
       let ohosAppId: string = call.args.get("ohosAppId");
       let appName: string = call.args.get("appName");
       let debug: boolean = call.args.get("debug");
+      let useMediation: boolean = call.args.get("useMediation");
       // 创建SDKConfig对象
       let adConfigBuilder = new SDKConfigBuilder()
       let config: SDKConfig = adConfigBuilder
@@ -66,6 +67,12 @@ export default class FlutterUnionadPlugin implements FlutterPlugin, MethodCallHa
         .appName(appName)
         .allowShowNotify(true)
         .debug(debug)
+        // 是否开启聚合功能  true:开启  false:不开启
+        .setMediationConfig(
+          new MediationConfigBuilder()
+            .useMediation(useMediation)
+            .build()
+        )
         .build()
 
       // 初始化SDK
